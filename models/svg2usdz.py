@@ -738,7 +738,10 @@ def build(spec, svg_path):
                     # Replace the body with a rounded rectangle fitted to it, so legs and antennas drawn
                     # across its edge leave no stubs, steps or dents in the rim.
                     e = float(size["clean_body_mm"])
-                    core = max(polygons(outline.buffer(-e)), key=lambda g: g.area)
+                    eroded = polygons(outline.buffer(-e))
+                    if not eroded:
+                        sys.exit(f"{svg_path}: clean_body_mm = {e} removes the whole outline; use less than half its narrowest side")
+                    core = max(eroded, key=lambda g: g.area)
                     rect = core.minimum_rotated_rectangle.buffer(e, join_style=2)
                     rr = float(size.get("body_radius_mm", 0))
                     if rr > 0:
